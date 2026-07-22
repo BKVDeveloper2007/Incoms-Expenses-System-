@@ -288,7 +288,7 @@
             color: #9ca3af;
         }
 
-        /* --- New Photo Grid Layout Styles --- */
+        /* --- Photo Grid Layout Styles --- */
         .photo-grid {
             display: flex;
             flex-direction: column;
@@ -431,6 +431,63 @@
         
         .search-container input {
             padding-left: 45px;
+        }
+
+        /* Card layout for Income Table to display long names seamlessly */
+        .income-list-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 280px;
+            overflow-y: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .income-card-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .income-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .income-card-name {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1rem;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            flex: 1;
+        }
+
+        .income-card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 6px;
+            margin-top: 2px;
+        }
+
+        .income-card-amount {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.95rem;
         }
 
         /* -----------------------------------------------------------------
@@ -621,16 +678,8 @@
                         <i class="ph-duotone ph-magnifying-glass"></i>
                         <input type="text" id="searchIncomeInput" class="form-control" placeholder="Search by Name..." onkeyup="filterIncome()">
                     </div>
-                    <div class="table-responsive">
-                        <div class="table-container">
-                            <table id="manageIncomeTable">
-                                <thead>
-                                    <tr><th style="width: 10%;">#</th><th>Date</th><th>Name</th><th>Amt</th><th>Del</th></tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- Card list layout instead of strict table columns to make long names completely clear and readable -->
+                    <div id="manageIncomeContainer" class="income-list-cards"></div>
                 </div>
             </div>
         </div>
@@ -748,14 +797,11 @@
 
         function filterIncome() {
             const query = document.getElementById('searchIncomeInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#manageIncomeTable tbody tr');
+            const cards = document.querySelectorAll('.income-card-item');
             
-            rows.forEach(row => {
-                const nameCell = row.cells[2];
-                if (nameCell) {
-                    const name = nameCell.textContent.toLowerCase();
-                    row.style.display = name.includes(query) ? '' : 'none';
-                }
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                card.style.display = name.includes(query) ? '' : 'none';
             });
         }
 
@@ -858,7 +904,7 @@
         // --- Render UI ---
         function renderAll() {
             let totalInc = 0, totalExp = 0;
-            const mIncBody = document.querySelector('#manageIncomeTable tbody');
+            const mIncomeContainer = document.getElementById('manageIncomeContainer');
             const mExpBody = document.querySelector('#manageExpenseTable tbody');
             const oIncBody = document.querySelector('#overviewIncomeTable tbody');
             const oExpBody = document.querySelector('#overviewExpenseTable tbody');
@@ -868,7 +914,7 @@
             const mPhotosUnpaidContainer = document.getElementById('managePhotosUnpaidContainer');
             const mPhotosPendingContainer = document.getElementById('managePhotosPendingContainer');
 
-            mIncBody.innerHTML = ''; mExpBody.innerHTML = ''; oIncBody.innerHTML = ''; oExpBody.innerHTML = '';
+            mIncomeContainer.innerHTML = ''; mExpBody.innerHTML = ''; oIncBody.innerHTML = ''; oExpBody.innerHTML = '';
             mPhotosPaidContainer.innerHTML = ''; mPhotosUnpaidContainer.innerHTML = ''; mPhotosPendingContainer.innerHTML = '';
 
             // Render Incomes
@@ -878,7 +924,19 @@
                 const showDate = inc.date ? inc.date : '-';
                 const num = index + 1; 
                 
-                mIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280; white-space: nowrap;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td><td><button class="btn-delete" onclick="deleteIncome('${inc.id}')"><i class="ph-duotone ph-trash"></i></button></td></tr>`;
+                // Live Income Database uses card layout to handle long names perfectly without overflow/hiding
+                mIncomeContainer.innerHTML += `
+                <div class="income-card-item" data-name="${inc.name}">
+                    <div class="income-card-top">
+                        <div class="income-card-name"><strong>#${num}.</strong> ${inc.name}</div>
+                        <button class="btn-delete" style="padding: 4px 8px;" onclick="deleteIncome('${inc.id}')"><i class="ph-duotone ph-trash"></i></button>
+                    </div>
+                    <div class="income-card-meta">
+                        <span><i class="ph-duotone ph-calendar"></i> ${showDate}</span>
+                        <span class="income-card-amount">LKR ${amtFormatted}</span>
+                    </div>
+                </div>`;
+
                 oIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280; white-space: nowrap;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td></tr>`;
             });
 
@@ -936,7 +994,7 @@
 
             // Empty states
             if(appData.incomes.length === 0) {
-                mIncBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Empty</td></tr>`;
+                mIncomeContainer.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:20px;">Empty</div>`;
                 oIncBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Empty</td></tr>`;
             }
             if(appData.expenses.length === 0) {
