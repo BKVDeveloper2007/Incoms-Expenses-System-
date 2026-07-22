@@ -408,6 +408,8 @@
         
         .btn-sync {
             background: var(--success);
+            padding: 12px;
+            font-size: 1rem;
         }
 
         .btn-print {
@@ -745,12 +747,14 @@
                     </form>
                 </div>
                 <div>
-                    <div class="card-title">
+                    <div class="card-title" style="margin-bottom: 15px;">
                         <span class="title-left"><i class="ph-duotone ph-list-checks"></i> Photo Contributions</span>
-                        <div style="display: flex; gap: 8px;">
-                            <button id="syncBtn" class="btn-sync" onclick="syncPhotosFromForm()"><i class="ph-bold ph-arrows-clockwise"></i> Sync Form</button>
-                            <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
-                        </div>
+                        <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                    </div>
+                    
+                    <!-- NEW FULL WIDTH SYNC BUTTON UNDERNEATH TITLE -->
+                    <div style="margin-bottom: 20px;">
+                        <button id="syncBtn" class="btn-sync" onclick="syncPhotosFromForm()" style="width: 100%;"><i class="ph-bold ph-arrows-clockwise"></i> Sync Database</button>
                     </div>
                     
                     <!-- Section 1: Paid & Photo Given -->
@@ -777,8 +781,8 @@
     <script>
         let appData = { incomes: [], expenses: [], photos: [] };
 
-        // ඔයාගේ Google Form API ලින්ක් එක මෙතන තියෙනවා
-        const GOOGLE_FORM_API_URL = "https://script.google.com/macros/s/AKfycby4tDN5sm9FDj8SdmqPSg-QXdqqkkRFeGyFBI1cyNiwd19FZPs6tjO7hmYuuD88zfI/exec";
+        // අලුත් Google Form API ලින්ක් එක
+        const GOOGLE_FORM_API_URL = "https://script.google.com/macros/s/AKfycbyuZrD4UMAk_btRn-Sh55KfHIjBTRaTF3IwRLgxe5CKwXkRovRN1bN_G8sQjTR-uZ_w/exec";
 
         if (localStorage.getItem('birthday_ledger_data')) {
             const parsed = JSON.parse(localStorage.getItem('birthday_ledger_data'));
@@ -910,7 +914,7 @@
             saveToStorage();
         }
 
-        // --- NEW: Sync Photos From Google Form ---
+        // --- Sync Photos From Google Form ---
         async function syncPhotosFromForm() {
             const syncBtn = document.getElementById('syncBtn');
             const originalContent = syncBtn.innerHTML;
