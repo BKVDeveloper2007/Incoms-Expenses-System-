@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Income and Expenditure Statement</title>
+    <!-- Premium Phosphor Icons Library -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- HTML to Canvas Library for Image Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* White and Premium Blue System Theme */
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1e3a8a; 
+            --text-muted: #4b5563;
+            --border-color: #bfdbfe; 
+            --accent-blue: #2563eb; 
+            --hover-light: #eff6ff;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .system-header {
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .system-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .system-header p {
+            color: #93c5fd;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tab-navigation {
+            display: flex;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            color: var(--accent-blue);
+            background-color: var(--hover-light);
+        }
+        .tab-btn.active {
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grid-two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .grid-inner-cols {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-two-cols { grid-template-columns: 1fr; }
+            .tab-content { padding: 15px; }
+            .system-header h1 { font-size: 1.3rem; }
+        }
+
+        .input-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+        
+        .title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            font-size: 1.3rem;
+            color: var(--accent-blue);
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #000000;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+            background-color: #ffffff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .btn-submit:hover { opacity: 0.9; }
+
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #eff6ff;
+            padding: 12px 15px;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eff6ff;
+            color: #374151;
+            vertical-align: middle;
+        }
+
+        .amount-td {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-delete {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            color: #4b5563;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 6px 10px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-delete:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+        .check-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.6rem;
+            transition: all 0.2s;
+        }
+        .check-btn.paid {
+            color: var(--success);
+        }
+        .check-btn.unpaid {
+            color: #9ca3af;
+        }
+
+        /* --- New Photo Grid Layout Styles --- */
+        .photo-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .photo-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex: 1 1 auto;
+            min-width: 200px;
+            max-width: 100%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .photo-card.pending-card {
+            border-color: #fcd34d;
+            background: #fffbeb;
+        }
+
+        .photo-card span {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .photo-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .status-banner {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            border: 2px solid var(--text-main);
+            color: var(--text-main);
+            text-transform: uppercase;
+            background-color: #eff6ff;
+        }
+
+        .print-actions {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .btn-print, .btn-download {
+            background: var(--text-main);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        
+        .btn-print {
+            padding: 14px 30px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .btn-print:hover, .btn-download:hover { opacity: 0.9; }
+
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .search-container i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+        
+        .search-container input {
+            padding-left: 45px;
+        }
+
+        /* -----------------------------------------------------------------
+           RECEIPT CAPTURE AREA (Hidden from user, used for Image Download)
+           STRICTLY BLACK AND WHITE & OVERRIDING GLOBAL STYLES
+           ----------------------------------------------------------------- */
+        #receipt-capture-area {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 320px; 
+            background-color: #ffffff;
+            color: #000000;
+            padding: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+            z-index: -100;
+        }
+
+        .receipt-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 2px dashed #000000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            color: #000000;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            color: #000000;
+        }
+
+        .receipt-table th {
+            text-align: left;
+            border-bottom: 1px dashed #000000 !important;
+            padding: 6px 0 !important;
+            margin-bottom: 5px;
+            color: #000000 !important;
+            background-color: transparent !important;
+            position: static !important;
+        }
+
+        .receipt-table td {
+            padding: 4px 0 !important;
+            vertical-align: top;
+            color: #000000 !important;
+            background-color: transparent !important;
+            border-bottom: none !important;
+        }
+
+        .receipt-total {
+            border-top: 2px dashed #000000;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #000000;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 20px;
+            color: #000000;
+        }
+
+        /* Print Specific Styles */
+        #printReportView { display: none; }
+
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; margin: 0 !important; }
+            .system-container { display: none !important; }
+            #printReportView { display: block !important; width: 100%; font-family: 'Times New Roman', Times, serif; }
+            @page { size: A4 portrait; margin: 5mm; }
+            .print-border-box { border: 2px solid #000; padding: 10px; box-sizing: border-box; }
+            .print-title { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+            .pl-table { width: 100%; border-collapse: collapse; }
+            .pl-table th, .pl-table td { border: 1px solid #000; padding: 4px 6px; font-size: 12px; color: #000000 !important; }
+            .text-left { text-align: left; } .text-right { text-align: right; } .text-center { text-align: center; } .bold { font-weight: bold; }
+            .black-header-row th { background-color: #000000 !important; color: #ffffff !important; font-weight: bold; font-size: 13px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .sub-header td { background-color: #f3f4f6 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .middle-divider { border-right: 2px solid #000 !important; }
+            .spacer-row td { height: 5px; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: none; border-top: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="system-container">
+        
+        <div class="system-header">
+            <h1>Income and Expenditure Statement</h1>
+            <p id="live-date">Financial Management System</p>
+        </div>
+
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('overview')" title="Overview"><i class="ph-duotone ph-squares-four"></i></button>
+            <button class="tab-btn" onclick="switchTab('income')" title="Income"><i class="ph-duotone ph-trend-down"></i></button>
+            <button class="tab-btn" onclick="switchTab('expense')" title="Expense"><i class="ph-duotone ph-trend-up"></i></button>
+            <button class="tab-btn" onclick="switchTab('photos')" title="Photos Checklist"><i class="ph-duotone ph-camera"></i></button>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <div id="statusBanner" class="status-banner">
+                <i class="ph-duotone ph-scales"></i> <span>Status</span>
+            </div>
+
+            <div class="summary-wrapper">
+                <div class="stat-card">
+                    <div class="stat-label">Total Income</div>
+                    <div class="stat-value" id="cardTotalIncome">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Expense</div>
+                    <div class="stat-value" id="cardTotalExpense">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Net Balance</div>
+                    <div class="stat-value" id="cardNetBalance">0.00</div>
+                </div>
+            </div>
+
+            <div class="grid-two-cols">
+                <div>
+                    <h3 class="card-title"><span class="title-left"><i class="ph-duotone ph-wallet"></i> Income Ledger</span></h3>
+                    <div class="table-responsive">
+                        <div class="table-container">
+                            <table id="overviewIncomeTable">
+                                <thead>
+                                    <tr><th style="width: 10%;">#</th><th>Date</th><th>Name</th><th>Amount</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="card-title"><span class="title-left"><i class="ph-duotone ph-receipt"></i> Expense Ledger</span></h3>
+                    <div class="table-responsive">
+                        <div class="table-container">
+                            <table id="overviewExpenseTable">
+                                <thead>
+                                    <tr><th>Item</th><th>Qty</th><th>Amount</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="print-actions">
+                <button class="btn-print" onclick="generateAndPrint()"><i class="ph-duotone ph-printer"></i> Generate PDF Report</button>
+            </div>
+        </div>
+
+        <!-- INCOME TAB -->
+        <div id="income" class="tab-content">
+            <div class="grid-two-cols">
+                <div class="input-card">
+                    <div class="card-title"><span class="title-left"><i class="ph-duotone ph-plus-circle"></i> Add Income</span></div>
+                    <form id="incomeForm" onsubmit="handleIncomeSubmit(event)">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="Student Name" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (LKR)</label>
+                            <input type="number" id="incomeAmtInput" class="form-control" value="300" min="0" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn-submit"><i class="ph-bold ph-plus"></i> Save Record</button>
+                    </form>
+                </div>
+                <div>
+                    <div class="card-title">
+                        <span class="title-left"><i class="ph-duotone ph-database"></i> Live Income Database</span>
+                        <button class="btn-download" onclick="downloadReceiptImage('income')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                    </div>
+                    <div class="search-container">
+                        <i class="ph-duotone ph-magnifying-glass"></i>
+                        <input type="text" id="searchIncomeInput" class="form-control" placeholder="Search by Name..." onkeyup="filterIncome()">
+                    </div>
+                    <div class="table-responsive">
+                        <div class="table-container">
+                            <table id="manageIncomeTable">
+                                <thead>
+                                    <tr><th style="width: 10%;">#</th><th>Date</th><th>Name</th><th>Amt</th><th>Del</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPENSE TAB -->
+        <div id="expense" class="tab-content">
+            <div class="grid-two-cols">
+                <div class="input-card">
+                    <div class="card-title"><span class="title-left"><i class="ph-duotone ph-minus-circle"></i> Add Expense</span></div>
+                    <form id="expenseForm" onsubmit="handleExpenseSubmit(event)">
+                        <div class="form-group">
+                            <label>Description / Item Name</label>
+                            <input type="text" id="expenseItem" class="form-control" placeholder="Item Name" required autocomplete="off">
+                        </div>
+                        
+                        <div class="grid-inner-cols">
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" id="expenseQtyInput" class="form-control" value="1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Total Price (LKR)</label>
+                                <input type="number" id="expenseAmtInput" class="form-control" placeholder="0.00" min="0" step="0.01" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="ph-bold ph-plus"></i> Save Record</button>
+                    </form>
+                </div>
+                <div>
+                    <div class="card-title">
+                        <span class="title-left"><i class="ph-duotone ph-database"></i> Live Expense Database</span>
+                        <button class="btn-download" onclick="downloadReceiptImage('expense')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                    </div>
+                    <div class="table-responsive">
+                        <div class="table-container">
+                            <table id="manageExpenseTable">
+                                <thead>
+                                    <tr><th>Item</th><th>Qty</th><th>Price</th><th>Del</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHOTOS TAB -->
+        <div id="photos" class="tab-content">
+            <div class="grid-two-cols">
+                <div class="input-card">
+                    <div class="card-title"><span class="title-left"><i class="ph-duotone ph-user-plus"></i> Add Photo Contributor</span></div>
+                    <form id="photoForm" onsubmit="handlePhotoSubmit(event)">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="photoName" class="form-control" placeholder="Contributor Name" required autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn-submit"><i class="ph-bold ph-plus"></i> Add Name</button>
+                    </form>
+                </div>
+                <div>
+                    <div class="card-title">
+                        <span class="title-left"><i class="ph-duotone ph-list-checks"></i> Photo Contributions</span>
+                        <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                    </div>
+                    
+                    <!-- Section 1: Paid & Photo Given -->
+                    <h4 style="margin: 5px 0 10px 0; color: var(--success); font-size: 0.85rem; text-transform: uppercase;">Paid & Photo Received</h4>
+                    <div id="managePhotosPaidContainer" class="photo-grid"></div>
+
+                    <!-- Section 2: Unpaid & Photo Given -->
+                    <h4 style="margin: 10px 0; color: #ef4444; font-size: 0.85rem; text-transform: uppercase;">Unpaid & Photo Received</h4>
+                    <div id="managePhotosUnpaidContainer" class="photo-grid"></div>
+
+                    <!-- Section 3: Paid but No Photo Yet -->
+                    <h4 style="margin: 10px 0; color: #f59e0b; font-size: 0.85rem; text-transform: uppercase;">Paid but Photo Pending (From Incomes)</h4>
+                    <div id="managePhotosPendingContainer" class="photo-grid"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Capture Area for Image Download -->
+    <div id="receipt-capture-area"></div>
+    <div id="printReportView"></div>
+
+    <script>
+        let appData = { incomes: [], expenses: [], photos: [] };
+
+        if (localStorage.getItem('birthday_ledger_data')) {
+            const parsed = JSON.parse(localStorage.getItem('birthday_ledger_data'));
+            appData.incomes = parsed.incomes || [];
+            appData.expenses = parsed.expenses || [];
+            appData.photos = parsed.photos || []; 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            renderAll();
+        });
+
+        function saveToStorage() {
+            localStorage.setItem('birthday_ledger_data', JSON.stringify(appData));
+            renderAll();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function filterIncome() {
+            const query = document.getElementById('searchIncomeInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#manageIncomeTable tbody tr');
+            
+            rows.forEach(row => {
+                const nameCell = row.cells[2];
+                if (nameCell) {
+                    const name = nameCell.textContent.toLowerCase();
+                    row.style.display = name.includes(query) ? '' : 'none';
+                }
+            });
+        }
+
+        // --- Income Logic ---
+        function handleIncomeSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const amount = parseFloat(document.getElementById('incomeAmtInput').value);
+            const recordDate = new Date().toLocaleDateString('en-GB'); 
+
+            if (name && amount >= 0) {
+                appData.incomes.push({ id: Date.now().toString(), name, amount, date: recordDate });
+                document.getElementById('studentName').value = '';
+                document.getElementById('incomeAmtInput').value = '300';
+                saveToStorage();
+                document.getElementById('studentName').focus();
+                document.getElementById('searchIncomeInput').value = '';
+            }
+        }
+
+        function deleteIncome(id) {
+            if (confirm("Are you sure you want to delete this income record?")) {
+                appData.incomes = appData.incomes.filter(inc => inc.id !== id);
+                saveToStorage();
+            }
+        }
+
+        // --- Expense Logic ---
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            const item = document.getElementById('expenseItem').value.trim();
+            const qty = parseInt(document.getElementById('expenseQtyInput').value); 
+            const amount = parseFloat(document.getElementById('expenseAmtInput').value);
+            
+            if (item && amount >= 0 && qty > 0) {
+                appData.expenses.push({ id: Date.now().toString(), item, qty, amount });
+                document.getElementById('expenseForm').reset();
+                document.getElementById('expenseQtyInput').value = '1'; 
+                saveToStorage();
+            }
+        }
+
+        function deleteExpense(id) {
+            if (confirm("Are you sure you want to delete this expense record?")) {
+                appData.expenses = appData.expenses.filter(exp => exp.id !== id);
+                saveToStorage();
+            }
+        }
+
+        // --- Photos Logic ---
+        function handlePhotoSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('photoName').value.trim();
+            
+            if (name) {
+                const isPaid = appData.incomes.some(inc => inc.name.toLowerCase() === name.toLowerCase());
+                appData.photos.push({ id: Date.now().toString(), name: name, paid: isPaid });
+                document.getElementById('photoForm').reset();
+                saveToStorage();
+                document.getElementById('photoName').focus();
+            }
+        }
+
+        function togglePhotoPaid(id) {
+            const photo = appData.photos.find(p => p.id === id);
+            if(photo) {
+                photo.paid = !photo.paid;
+                
+                if (photo.paid) {
+                    const isPaidAlready = appData.incomes.some(inc => inc.name.toLowerCase() === photo.name.toLowerCase());
+                    if (!isPaidAlready) {
+                        const recordDate = new Date().toLocaleDateString('en-GB');
+                        appData.incomes.push({ 
+                            id: 'inc_' + Date.now().toString(), 
+                            name: photo.name, 
+                            amount: 300, 
+                            date: recordDate 
+                        });
+                    }
+                } else {
+                    appData.incomes = appData.incomes.filter(inc => inc.name.toLowerCase() !== photo.name.toLowerCase());
+                }
+
+                saveToStorage();
+            }
+        }
+
+        function deletePhoto(id) {
+            if (confirm("Are you sure you want to delete this name?")) {
+                appData.photos = appData.photos.filter(p => p.id !== id);
+                saveToStorage();
+            }
+        }
+
+        function markPhotoGivenFromPending(name) {
+            // Already paid (in income list), just add to photos list
+            appData.photos.push({ id: Date.now().toString(), name: name, paid: true });
+            saveToStorage();
+        }
+
+        // --- Render UI ---
+        function renderAll() {
+            let totalInc = 0, totalExp = 0;
+            const mIncBody = document.querySelector('#manageIncomeTable tbody');
+            const mExpBody = document.querySelector('#manageExpenseTable tbody');
+            const oIncBody = document.querySelector('#overviewIncomeTable tbody');
+            const oExpBody = document.querySelector('#overviewExpenseTable tbody');
+
+            // Photos Containers
+            const mPhotosPaidContainer = document.getElementById('managePhotosPaidContainer');
+            const mPhotosUnpaidContainer = document.getElementById('managePhotosUnpaidContainer');
+            const mPhotosPendingContainer = document.getElementById('managePhotosPendingContainer');
+
+            mIncBody.innerHTML = ''; mExpBody.innerHTML = ''; oIncBody.innerHTML = ''; oExpBody.innerHTML = '';
+            mPhotosPaidContainer.innerHTML = ''; mPhotosUnpaidContainer.innerHTML = ''; mPhotosPendingContainer.innerHTML = '';
+
+            // Render Incomes
+            appData.incomes.forEach((inc, index) => {
+                totalInc += inc.amount;
+                const amtFormatted = inc.amount.toFixed(2);
+                const showDate = inc.date ? inc.date : '-';
+                const num = index + 1; 
+                
+                mIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td><td><button class="btn-delete" onclick="deleteIncome('${inc.id}')"><i class="ph-duotone ph-trash"></i></button></td></tr>`;
+                oIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td></tr>`;
+            });
+
+            // Render Expenses
+            appData.expenses.forEach(exp => {
+                totalExp += exp.amount;
+                const amtFormatted = exp.amount.toFixed(2);
+                const q = exp.qty || 1; 
+                
+                mExpBody.innerHTML += `<tr><td>${exp.item}</td><td>${q}</td><td class="amount-td">${amtFormatted}</td><td><button class="btn-delete" onclick="deleteExpense('${exp.id}')"><i class="ph-duotone ph-trash"></i></button></td></tr>`;
+                oExpBody.innerHTML += `<tr><td>${exp.item}</td><td>${q}</td><td class="amount-td">${amtFormatted}</td></tr>`;
+            });
+
+            // Render Photos (Grid Layout)
+            let paidCount = 0;
+            let unpaidCount = 0;
+            let pendingCount = 0;
+
+            appData.photos.forEach(photo => {
+                const checkIcon = photo.paid ? '<i class="ph-fill ph-check-circle"></i>' : '<i class="ph ph-circle"></i>';
+                const checkClass = photo.paid ? 'paid' : 'unpaid';
+                
+                const cardHTML = `
+                <div class="photo-card">
+                    <span>${photo.name}</span>
+                    <div class="photo-actions">
+                        <button class="check-btn ${checkClass}" onclick="togglePhotoPaid('${photo.id}')" title="Toggle Paid Status">${checkIcon}</button>
+                        <button class="btn-delete" style="padding: 4px 6px;" onclick="deletePhoto('${photo.id}')" title="Delete"><i class="ph-duotone ph-trash"></i></button>
+                    </div>
+                </div>`;
+
+                if (photo.paid) {
+                    mPhotosPaidContainer.innerHTML += cardHTML;
+                    paidCount++;
+                } else {
+                    mPhotosUnpaidContainer.innerHTML += cardHTML;
+                    unpaidCount++;
+                }
+            });
+
+            // Pending Photos Check
+            appData.incomes.forEach(inc => {
+                const hasPhoto = appData.photos.some(p => p.name.toLowerCase() === inc.name.toLowerCase());
+                if (!hasPhoto) {
+                    mPhotosPendingContainer.innerHTML += `
+                    <div class="photo-card pending-card">
+                        <span>${inc.name}</span>
+                        <div class="photo-actions">
+                            <button class="check-btn unpaid" onclick="markPhotoGivenFromPending('${inc.name}')" title="Mark as Photo Given"><i class="ph ph-circle"></i></button>
+                        </div>
+                    </div>`;
+                    pendingCount++;
+                }
+            });
+
+            // Empty states
+            if(appData.incomes.length === 0) {
+                mIncBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Empty</td></tr>`;
+                oIncBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Empty</td></tr>`;
+            }
+            if(appData.expenses.length === 0) {
+                mExpBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Empty</td></tr>`;
+                oExpBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Empty</td></tr>`;
+            }
+            if(paidCount === 0) mPhotosPaidContainer.innerHTML = `<div style="width:100%; text-align:center; color:#94a3b8; padding:10px;">No Paid Photos</div>`;
+            if(unpaidCount === 0) mPhotosUnpaidContainer.innerHTML = `<div style="width:100%; text-align:center; color:#94a3b8; padding:10px;">No Unpaid Photos</div>`;
+            if(pendingCount === 0) mPhotosPendingContainer.innerHTML = `<div style="width:100%; text-align:center; color:#94a3b8; padding:10px;">No Pending Photos</div>`;
+
+            const netBalance = totalInc - totalExp;
+            document.getElementById('cardTotalIncome').innerText = `${totalInc.toFixed(2)}`;
+            document.getElementById('cardTotalExpense').innerText = `${totalExp.toFixed(2)}`;
+            document.getElementById('cardNetBalance').innerText = `${netBalance.toFixed(2)}`;
+
+            const banner = document.getElementById('statusBanner');
+            if (appData.incomes.length === 0 && appData.expenses.length === 0) {
+                banner.innerHTML = `<i class="ph-duotone ph-warning-circle"></i> <span>NO DATA RECORDED</span>`;
+            } else if (netBalance > 0) {
+                banner.innerHTML = `<i class="ph-duotone ph-trend-up"></i> <span>SURPLUS: LKR ${netBalance.toFixed(2)}</span>`;
+            } else if (netBalance < 0) {
+                banner.innerHTML = `<i class="ph-duotone ph-trend-down"></i> <span>DEFICIT: LKR ${Math.abs(netBalance).toFixed(2)}</span>`;
+            } else {
+                banner.innerHTML = `<i class="ph-duotone ph-scales"></i> <span>BALANCED</span>`;
+            }
+            
+            if(document.getElementById('searchIncomeInput')) {
+                filterIncome();
+            }
+        }
+
+        // --- IMAGE DOWNLOAD LOGIC (BLACK & WHITE RECEIPT) ---
+        function downloadReceiptImage(type) {
+            const captureArea = document.getElementById('receipt-capture-area');
+            const currentDate = new Date().toLocaleDateString('en-GB');
+            let content = '';
+            let fileName = '';
+
+            if (type === 'income') {
+                fileName = 'Income_Receipt.png';
+                let sum = 0;
+                let count = 0;
+                let rows = appData.incomes.map((inc, i) => {
+                    sum += inc.amount;
+                    count++;
+                    return `<tr><td style="text-align:center;">${i+1}</td><td>${inc.name}</td><td style="text-align:right;">${inc.amount.toFixed(2)}</td></tr>`;
+                }).join('');
+                
+                content = `
+                    <div class="receipt-title">INCOME RECEIPT</div>
+                    <div style="font-size:12px; margin-bottom:10px;">Date: ${currentDate}</div>
+                    <table class="receipt-table">
+                        <thead><tr><th style="text-align:center; width:15%;">#</th><th>Name</th><th style="text-align:right;">Amount</th></tr></thead>
+                        <tbody>${rows || '<tr><td colspan="3" style="text-align:center;">No Records</td></tr>'}</tbody>
+                    </table>
+                    <div class="receipt-total">
+                        <span>TOTAL</span>
+                        <span>[Count: ${count}] &nbsp;&nbsp; LKR ${sum.toFixed(2)}</span>
+                    </div>
+                `;
+            } 
+            else if (type === 'expense') {
+                fileName = 'Expense_Receipt.png';
+                let sum = 0;
+                let rows = appData.expenses.map(exp => {
+                    sum += exp.amount;
+                    let q = exp.qty || 1;
+                    return `<tr><td>${exp.item}</td><td style="text-align:center;">${q}</td><td style="text-align:right;">${exp.amount.toFixed(2)}</td></tr>`;
+                }).join('');
+                
+                content = `
+                    <div class="receipt-title">EXPENSE RECEIPT</div>
+                    <div style="font-size:12px; margin-bottom:10px;">Date: ${currentDate}</div>
+                    <table class="receipt-table">
+                        <thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th></tr></thead>
+                        <tbody>${rows || '<tr><td colspan="3" style="text-align:center;">No Records</td></tr>'}</tbody>
+                    </table>
+                    <div class="receipt-total"><span>TOTAL</span><span>LKR ${sum.toFixed(2)}</span></div>
+                `;
+            }
+            else if (type === 'photos') {
+                fileName = 'Photos_Contributors.png';
+                let totalPhotos = appData.photos.length;
+                let rows = appData.photos.map((p, i) => {
+                    // Name isarahata count eka, eha paththen Hariya (✔)
+                    return `<tr><td>${i+1}. ${p.name}</td><td style="text-align:right; font-weight:bold; font-size:15px;">✔</td></tr>`;
+                }).join('');
+                
+                content = `
+                    <div class="receipt-title" style="font-size: 14px;">Names of those who gave photos</div>
+                    <div style="font-size:12px; margin-bottom:5px;">Date: ${currentDate}</div>
+                    <div style="font-size:13px; font-weight:bold; margin-bottom:12px; border-bottom:1px dashed #000; padding-bottom:8px;">
+                        TOTAL COUNT: ${totalPhotos}
+                    </div>
+                    <table class="receipt-table">
+                        <thead><tr><th>Name</th><th style="text-align:right;">Status</th></tr></thead>
+                        <tbody>${rows || '<tr><td colspan="2" style="text-align:center;">No Records</td></tr>'}</tbody>
+                    </table>
+                    <div class="receipt-footer">Generated by System</div>
+                `;
+            }
+
+            captureArea.innerHTML = content;
+
+            // Generate Image
+            html2canvas(captureArea, {
+                backgroundColor: "#ffffff",
+                scale: 2 // High resolution
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // --- OLD PDF PRINT LOGIC ---
+        function generateAndPrint() {
+            let totalInc = 0;
+            let totalExp = 0;
+            
+            appData.incomes.forEach(inc => totalInc += inc.amount);
+            appData.expenses.forEach(exp => totalExp += exp.amount);
+            
+            let html = `
+            <div class="print-border-box">
+                <div class="print-title">Income & Expenditure Statement</div>
+                <table class="pl-table">
+                    <thead>
+                        <tr class="black-header-row">
+                            <th colspan="2" class="text-center middle-divider" style="border-right: 2px solid #fff !important;">INCOME (ලැබීම්)</th>
+                            <th colspan="2" class="text-center">EXPENSES (වියදම්)</th>
+                        </tr>
+                        <tr class="sub-header">
+                            <td style="width: 35%;">Source Name</td>
+                            <td style="width: 15%;" class="middle-divider">LKR</td>
+                            <td style="width: 35%;">Item Description</td>
+                            <td style="width: 15%;">LKR</td>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            const maxRows = Math.max(appData.incomes.length, appData.expenses.length);
+            
+            if (maxRows === 0) {
+                html += `<tr><td colspan="2" class="text-center middle-divider">No Income Recorded</td><td colspan="2" class="text-center">No Expenses Recorded</td></tr>`;
+            } else {
+                for (let i = 0; i < maxRows; i++) {
+                    let inc = appData.incomes[i];
+                    let exp = appData.expenses[i];
+                    let incName = inc ? inc.name : '';
+                    let incAmt = inc ? inc.amount.toFixed(2) : '';
+                    
+                    let expName = exp ? exp.item : '';
+                    if(exp && exp.qty && exp.qty > 1) {
+                        expName += ` (x${exp.qty})`;
+                    }
+                    let expAmt = exp ? exp.amount.toFixed(2) : '';
+                    
+                    html += `<tr><td>${incName}</td><td class="text-right middle-divider">${incAmt}</td><td>${expName}</td><td class="text-right">${expAmt}</td></tr>`;
+                }
+            }
+            
+            const net = totalInc - totalExp;
+            let netLabel = net >= 0 ? "PROFIT" : "LOSS";
+            
+            html += `
+                        <tr class="bold" style="border-top: 2px solid #000; background-color: #f8fafc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                            <td>TOTAL INCOME</td><td class="text-right middle-divider">${totalInc.toFixed(2)}</td>
+                            <td>TOTAL EXPENSE</td><td class="text-right">${totalExp.toFixed(2)}</td>
+                        </tr>
+                        <tr class="spacer-row"><td colspan="4"></td></tr>
+                        <tr>
+                            <td colspan="4" style="padding: 0; border: none;">
+                                <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                    <tr class="bold" style="font-size: 15px; background-color: #e5e7eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                                        <td style="width: 70%; text-align: left; padding: 10px; border: 1px solid #000;">NET BALANCE (${netLabel})</td>
+                                        <td style="width: 30%; text-align: right; padding: 10px; border: 1px solid #000;">${Math.abs(net).toFixed(2)}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+            
+            document.getElementById('printReportView').innerHTML = html;
+            window.print();
+        }
+    </script>
+</body>
+</html>
