@@ -245,11 +245,14 @@
             border-bottom: 1px solid #eff6ff;
             color: #374151;
             vertical-align: middle;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .amount-td {
             font-weight: 700;
             color: var(--text-main);
+            white-space: nowrap;
         }
 
         .btn-delete {
@@ -288,7 +291,7 @@
         /* --- New Photo Grid Layout Styles --- */
         .photo-grid {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 10px;
             margin-bottom: 20px;
             max-height: 250px;
@@ -308,9 +311,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 15px;
-            flex: 1 1 auto;
-            min-width: 200px;
-            max-width: 100%;
+            width: 100%;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         
@@ -323,15 +324,17 @@
             font-weight: 600;
             color: var(--text-main);
             font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            flex: 1;
+            min-width: 0;
         }
         
         .photo-actions {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .summary-wrapper {
@@ -848,7 +851,6 @@
         }
 
         function markPhotoGivenFromPending(name) {
-            // Already paid (in income list), just add to photos list
             appData.photos.push({ id: Date.now().toString(), name: name, paid: true });
             saveToStorage();
         }
@@ -876,8 +878,8 @@
                 const showDate = inc.date ? inc.date : '-';
                 const num = index + 1; 
                 
-                mIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td><td><button class="btn-delete" onclick="deleteIncome('${inc.id}')"><i class="ph-duotone ph-trash"></i></button></td></tr>`;
-                oIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td></tr>`;
+                mIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280; white-space: nowrap;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td><td><button class="btn-delete" onclick="deleteIncome('${inc.id}')"><i class="ph-duotone ph-trash"></i></button></td></tr>`;
+                oIncBody.innerHTML += `<tr><td style="font-weight:bold;">${num}</td><td style="font-size: 0.8rem; color: #6b7280; white-space: nowrap;">${showDate}</td><td>${inc.name}</td><td class="amount-td">${amtFormatted}</td></tr>`;
             });
 
             // Render Expenses
@@ -1019,7 +1021,6 @@
                 fileName = 'Photos_Contributors.png';
                 let totalPhotos = appData.photos.length;
                 let rows = appData.photos.map((p, i) => {
-                    // Name isarahata count eka, eha paththen Hariya (✔)
                     return `<tr><td>${i+1}. ${p.name}</td><td style="text-align:right; font-weight:bold; font-size:15px;">✔</td></tr>`;
                 }).join('');
                 
@@ -1039,10 +1040,9 @@
 
             captureArea.innerHTML = content;
 
-            // Generate Image
             html2canvas(captureArea, {
                 backgroundColor: "#ffffff",
-                scale: 2 // High resolution
+                scale: 2
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = fileName;
