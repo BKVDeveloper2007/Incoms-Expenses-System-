@@ -389,7 +389,7 @@
             margin-top: 25px;
         }
 
-        .btn-print, .btn-download {
+        .btn-print, .btn-download, .btn-sync {
             background: var(--text-main);
             color: #ffffff;
             font-weight: 700;
@@ -406,6 +406,10 @@
             transition: opacity 0.2s;
         }
         
+        .btn-sync {
+            background: var(--success);
+        }
+
         .btn-print {
             padding: 14px 30px;
             font-size: 1rem;
@@ -413,7 +417,7 @@
             max-width: 350px;
         }
 
-        .btn-print:hover, .btn-download:hover { opacity: 0.9; }
+        .btn-print:hover, .btn-download:hover, .btn-sync:hover { opacity: 0.9; }
 
         .search-container {
             margin-bottom: 15px;
@@ -678,7 +682,6 @@
                         <i class="ph-duotone ph-magnifying-glass"></i>
                         <input type="text" id="searchIncomeInput" class="form-control" placeholder="Search by Name..." onkeyup="filterIncome()">
                     </div>
-                    <!-- Card list layout instead of strict table columns to make long names completely clear and readable -->
                     <div id="manageIncomeContainer" class="income-list-cards"></div>
                 </div>
             </div>
@@ -744,7 +747,10 @@
                 <div>
                     <div class="card-title">
                         <span class="title-left"><i class="ph-duotone ph-list-checks"></i> Photo Contributions</span>
-                        <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="syncBtn" class="btn-sync" onclick="syncPhotosFromForm()"><i class="ph-bold ph-arrows-clockwise"></i> Sync Form</button>
+                            <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
+                        </div>
                     </div>
                     
                     <!-- Section 1: Paid & Photo Given -->
@@ -770,6 +776,9 @@
 
     <script>
         let appData = { incomes: [], expenses: [], photos: [] };
+
+        // ඔයාගේ Google Form API ලින්ක් එක මෙතන තියෙනවා
+        const GOOGLE_FORM_API_URL = "https://script.google.com/macros/s/AKfycby4tDN5sm9FDj8SdmqPSg-QXdqqkkRFeGyFBI1cyNiwd19FZPs6tjO7hmYuuD88zfI/exec";
 
         if (localStorage.getItem('birthday_ledger_data')) {
             const parsed = JSON.parse(localStorage.getItem('birthday_ledger_data'));
@@ -901,6 +910,60 @@
             saveToStorage();
         }
 
+        // --- NEW: Sync Photos From Google Form ---
+        async function syncPhotosFromForm() {
+            const syncBtn = document.getElementById('syncBtn');
+            const originalContent = syncBtn.innerHTML;
+            
+            try {
+                // Button එක Loading විදිහට පෙන්වීම
+                syncBtn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Syncing...';
+                syncBtn.disabled = true;
+
+                // API එකෙන් ඩේටා ගැනීම
+                const response = await fetch(GOOGLE_FORM_API_URL);
+                const fetchedNames = await response.json();
+                
+                let addedCount = 0;
+
+                fetchedNames.forEach(name => {
+                    const cleanName = name.trim();
+                    if(cleanName === "") return;
+
+                    // නම දැනටමත් photos ලිස්ට් එකේ තියෙනවද කියලා බලනවා
+                    const nameExists = appData.photos.some(p => p.name.toLowerCase() === cleanName.toLowerCase());
+                    
+                    if (!nameExists) {
+                        // සල්ලි දීලද කියලා ඉන්කම් ලිස්ට් එකෙන් බලනවා
+                        const isPaid = appData.incomes.some(inc => inc.name.toLowerCase() === cleanName.toLowerCase());
+                        
+                        // අලුත් නම ඇඩ් කරනවා
+                        appData.photos.push({ 
+                            id: Date.now().toString() + Math.random().toString(36).substring(7), 
+                            name: cleanName, 
+                            paid: isPaid 
+                        });
+                        addedCount++;
+                    }
+                });
+
+                if (addedCount > 0) {
+                    saveToStorage();
+                    alert(`Sync සාර්ථකයි! අලුත් නම් ${addedCount} ක් එකතු වුණා.`);
+                } else {
+                    alert("අලුත් නම් කිසිවක් හමුවුණේ නෑ.");
+                }
+
+            } catch (error) {
+                console.error("Sync Error:", error);
+                alert("Sync කිරීමට නොහැකි විය. කරුණාකර අන්තර්ජාල සබඳතාවය පරීක්ෂා කරන්න.");
+            } finally {
+                // Button එක ආයෙත් පරණ විදිහටම හැදීම
+                syncBtn.innerHTML = originalContent;
+                syncBtn.disabled = false;
+            }
+        }
+
         // --- Render UI ---
         function renderAll() {
             let totalInc = 0, totalExp = 0;
@@ -924,7 +987,7 @@
                 const showDate = inc.date ? inc.date : '-';
                 const num = index + 1; 
                 
-                // Live Income Database uses card layout to handle long names perfectly without overflow/hiding
+                // Live Income Database uses card layout
                 mIncomeContainer.innerHTML += `
                 <div class="income-card-item" data-name="${inc.name}">
                     <div class="income-card-top">
@@ -1026,7 +1089,7 @@
             }
         }
 
-        // --- IMAGE DOWNLOAD LOGIC (BLACK & WHITE RECEIPT) ---
+        // --- IMAGE DOWNLOAD LOGIC ---
         function downloadReceiptImage(type) {
             const captureArea = document.getElementById('receipt-capture-area');
             const currentDate = new Date().toLocaleDateString('en-GB');
