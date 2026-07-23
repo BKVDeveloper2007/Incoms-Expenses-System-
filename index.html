@@ -309,8 +309,7 @@
             flex-direction: column;
             gap: 10px;
             margin-bottom: 20px;
-            max-height: 350px;
-            overflow-y: auto;
+            /* Internal Scroll අයින් කර ඇත */
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -775,7 +774,8 @@
                     <div class="card-title">
                         <span class="title-left"><i class="ph-duotone ph-clock"></i> Pending (Paid but No Photo)</span>
                     </div>
-                    <div id="managePhotosPendingContainer" class="photo-grid" style="max-height: 450px;"></div>
+                    <!-- Removed style="max-height: 450px;" -->
+                    <div id="managePhotosPendingContainer" class="photo-grid"></div>
                 </div>
             </div>
         </div>
@@ -785,6 +785,12 @@
             <div class="card-title" style="margin-bottom: 20px;">
                 <span class="title-left"><i class="ph-duotone ph-images"></i> Received Photos List</span>
                 <button class="btn-download" onclick="downloadReceiptImage('photos')"><i class="ph-bold ph-download-simple"></i> Image</button>
+            </div>
+            
+            <!-- New Search Bar for Photos -->
+            <div class="search-container">
+                <i class="ph-duotone ph-magnifying-glass"></i>
+                <input type="text" id="searchPhotoInput" class="form-control" placeholder="Search received photos by name..." onkeyup="filterPhotos()">
             </div>
             
             <div class="grid-two-cols">
@@ -841,19 +847,31 @@
             });
         }
 
+        // New function to filter photos
+        function filterPhotos() {
+            const query = document.getElementById('searchPhotoInput').value.toLowerCase();
+            const photoCards = document.querySelectorAll('#received-photos .photo-card');
+            photoCards.forEach(card => {
+                const nameText = card.querySelector('span').innerText.toLowerCase();
+                card.style.display = nameText.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // Exact Match Updated
         function checkDuplicateName(newName) {
             const cleanNew = newName.toLowerCase().trim();
             return appData.photos.some(p => {
                 const existing = p.name.toLowerCase().trim();
-                return existing.includes(cleanNew) || cleanNew.includes(existing);
+                return existing === cleanNew;
             });
         }
 
+        // Exact Match Updated
         function checkIfPaid(searchName) {
             const cleanSearch = searchName.toLowerCase().trim();
             return appData.incomes.some(inc => {
                 const incName = inc.name.toLowerCase().trim();
-                return incName.includes(cleanSearch) || cleanSearch.includes(incName);
+                return incName === cleanSearch;
             });
         }
 
@@ -868,8 +886,9 @@
                 document.getElementById('studentName').value = '';
                 document.getElementById('incomeAmtInput').value = '300';
                 
+                // Exact Match Updated
                 appData.photos.forEach(p => {
-                    if (p.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(p.name.toLowerCase())) {
+                    if (p.name.toLowerCase().trim() === name.toLowerCase().trim()) {
                         p.paid = true;
                     }
                 });
@@ -913,7 +932,7 @@
             
             if (name) {
                 if (checkDuplicateName(name)) {
-                    alert('මෙම නම (හෝ මෙයට සමාන නමක්) දැනටමත් සිස්ටම් එකේ ඇත.');
+                    alert('මෙම නම දැනටමත් සිස්ටම් එකේ ඇත.');
                 } else {
                     const isPaid = checkIfPaid(name);
                     appData.photos.push({ id: Date.now().toString(), name: name, paid: isPaid });
@@ -936,7 +955,7 @@
                         appData.incomes.push({ id: 'inc_' + Date.now().toString(), name: photo.name, amount: 300, date: recordDate });
                     }
                 } else {
-                    appData.incomes = appData.incomes.filter(inc => inc.name.toLowerCase() !== photo.name.toLowerCase());
+                    appData.incomes = appData.incomes.filter(inc => inc.name.toLowerCase().trim() !== photo.name.toLowerCase().trim());
                 }
                 saveToStorage();
             }
@@ -1117,8 +1136,9 @@
                 }
             });
 
+            // Exact Match Updated
             appData.incomes.forEach(inc => {
-                const hasPhoto = appData.photos.some(p => p.name.toLowerCase().includes(inc.name.toLowerCase()) || inc.name.toLowerCase().includes(p.name.toLowerCase()));
+                const hasPhoto = appData.photos.some(p => p.name.toLowerCase().trim() === inc.name.toLowerCase().trim());
                 
                 if (!hasPhoto) {
                     mPhotosPendingContainer.innerHTML += `
@@ -1156,6 +1176,7 @@
                 banner.innerHTML = `<i class="ph-duotone ph-scales"></i> <span>BALANCED</span>`;
             }
             if(document.getElementById('searchIncomeInput')) filterIncome();
+            if(document.getElementById('searchPhotoInput')) filterPhotos(); // Trigger filter after re-rendering
         }
 
         function downloadReceiptImage(type) {
